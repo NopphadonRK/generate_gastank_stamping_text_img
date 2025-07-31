@@ -11,9 +11,9 @@ This project creates realistic 3D rendered images of industrial gas cylinders wi
 - **Large Perfect Geometric Cylinders**: Increased radius (50% larger) for more prominent visual presence
 - **Enhanced Surface Roughness**: Dual-layer noise texture system with increased bump mapping (0.25 strength) for realistic industrial texture  
 - **Ultra-Matte Teal-Green Material**: Advanced anti-reflective material using mix shader system (30% metallic, 70% diffuse) with #30877b teal-green color, ultra-high roughness (0.95), and minimal metallic properties (0.15) to eliminate specular hotspots
-- **Reduced Environment Lighting**: Optimized environment lighting (0.08 strength) to minimize reflections while maintaining visibility
+- **Balanced Fill-Light System**: Soft area fill light with reduced environment lighting (0.25 strength) provides gentle illumination without harsh shadows or specular hotspots
 - **Advanced Anti-Reflective System**: Mix shader approach combining metallic and diffuse BSDFs to eliminate bright specular reflections while maintaining material authenticity
-- **Balanced Environment Lighting**: Advanced lighting system with gradient environment, ambient light, and optimized three-point lighting
+- **Optimized Gradient Environment**: Moderate gradient (0.7-0.4) supports fill light as primary illumination source
 - **Maintained Geometric Integrity**: No subdivision modifiers or deformation - pure geometric form with surface texture
 - **Authentic Debossing Effects**: Text appears physically stamped into the metal surface
 - **FreesiaUPC Font Integration**: Uses Thai-style FreesiaUPC font for clear numeric text
@@ -55,8 +55,10 @@ generate_gastank_stamping_text_img/
 │   ├── cylinder_generator.py    # 3D cylinder model creation
 │   ├── text_embosser.py         # Text debossing effects
 │   ├── lighting_camera.py       # Scene lighting and camera control
+│   ├── lighting_gui.py          # NEW: Interactive lighting control GUI
 │   └── utils.py                 # Helper utilities
 ├── venv/                       # Python virtual environment
+├── run_lighting_gui.sh         # NEW: Launch lighting control GUI
 ├── clean_output.sh             # Remove generated files script
 ├── quick_commands.sh           # Development utilities menu
 ├── test.sh                     # Comprehensive test suite
@@ -103,14 +105,28 @@ generate_gastank_stamping_text_img/
 
 ### Basic Usage
 
-1. **Prepare Text Dictionary**
+1. **Interactive Lighting Control GUI** ⭐ **NEW**
+   ```bash
+   # Launch the interactive lighting control GUI
+   ./run_lighting_gui.sh
+   
+   # Or directly:
+   python3 scripts/lighting_gui.py
+   ```
+   - 🎛️ Real-time lighting adjustment with sliders
+   - 🔦 Toggle directional lights (Key, Fill, Rim)
+   - 🌍 Adjust environment lighting strength
+   - 🖼️ Generate test images instantly
+   - 🔄 Reset to defaults
+
+2. **Prepare Text Dictionary**
    ```bash
    # The project includes dict.txt with 100 xxxx-xxxxxx patterns
    # Example patterns: 6302-844353, 2417-001227, 3634-299252
    head -5 data/dict.txt
    ```
 
-2. **Quick Start - Use Utility Scripts**
+3. **Quick Start - Use Utility Scripts**
    ```bash
    # Interactive menu with common operations
    ./quick_commands.sh

@@ -98,24 +98,19 @@ class LightingCameraController:
     
     def setup_lighting(self) -> None:
         """
-        Setup balanced lighting system with environment lighting.
+        Setup soft lighting system with fill light only and reduced environment lighting.
         """
         
         # Clear existing lights
         self._clear_existing_lights()
         
-        # Set up environment lighting first
+        # Set up reduced environment lighting
         self._setup_environment_lighting()
         
-        # Create balanced three-point lighting setup
-        key_light = self._create_key_light()
+        # Add only fill light for soft illumination
         fill_light = self._create_fill_light()
-        rim_light = self._create_rim_light()
         
-        # Add additional ambient lighting for even illumination
-        ambient_light = self._create_ambient_light()
-        
-        logger.debug("Balanced lighting system with environment lighting created")
+        logger.debug("Soft fill-light-only lighting system created")
     
     def _clear_existing_lights(self) -> None:
         """Remove all existing lights from the scene."""
@@ -357,8 +352,8 @@ class LightingCameraController:
         world.node_tree.links.new(env_texture.outputs['Color'], background.inputs['Color'])
         world.node_tree.links.new(background.outputs['Background'], output.inputs['Surface'])
         
-        # Set very low environment strength to minimize reflections and hotspots
-        background.inputs['Strength'].default_value = 0.08  # Reduced from 0.15 to minimize reflections
+        # Set reduced environment strength with fill light support
+        background.inputs['Strength'].default_value = 0.25  # Reduced from 0.8 to support fill light
         
         # Create a simple gradient environment if no HDRI available
         self._create_gradient_environment(world, env_texture)
@@ -385,9 +380,9 @@ class LightingCameraController:
         world.node_tree.links.new(mapping.outputs['Vector'], color_ramp.inputs['Fac'])
         world.node_tree.links.new(color_ramp.outputs['Color'], world.node_tree.nodes['Background'].inputs['Color'])
         
-        # Set moderate gradient colors for visibility without harsh reflections
-        color_ramp.color_ramp.elements[0].color = (0.4, 0.4, 0.4, 1.0)  # Increased from 0.2 for visibility
-        color_ramp.color_ramp.elements[1].color = (0.15, 0.15, 0.15, 1.0)  # Increased from 0.05
+        # Set moderate gradient colors to support fill light as primary illumination
+        color_ramp.color_ramp.elements[0].color = (0.7, 0.7, 0.7, 1.0)  # Moderate bright top
+        color_ramp.color_ramp.elements[1].color = (0.4, 0.4, 0.4, 1.0)  # Medium bright bottom
         
         # Remove the environment texture node as we're using gradient
         world.node_tree.nodes.remove(env_texture)
