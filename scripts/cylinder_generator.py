@@ -129,13 +129,13 @@ class CylinderGenerator:
         # Connect BSDF to output
         material.node_tree.links.new(bsdf.outputs['BSDF'], output.inputs['Surface'])
         
-        # Randomize material properties for clean geometric appearance
-        base_color = random.choice(self.industrial_colors)
-        roughness = random.uniform(0.3, 0.7)  # Balanced roughness for geometric clarity
-        metallic = random.uniform(0.6, 0.9)   # Moderate metallic values for clean appearance
+        # Set glossy teal-green material properties
+        teal_green_color = (0.188, 0.529, 0.482, 1.0)  # #30877b converted to linear RGB
+        roughness = 0.1  # Low roughness for glossy surface
+        metallic = 0.8   # High metallic value for reflective appearance
         
         # Set material properties
-        bsdf.inputs['Base Color'].default_value = base_color
+        bsdf.inputs['Base Color'].default_value = teal_green_color
         bsdf.inputs['Roughness'].default_value = roughness
         bsdf.inputs['Metallic'].default_value = metallic
         
@@ -145,7 +145,7 @@ class CylinderGenerator:
         elif 'IOR' in bsdf.inputs:
             bsdf.inputs['IOR'].default_value = 1.5
         
-        logger.debug(f"Material: color={base_color[:3]}, roughness={roughness:.2f}, metallic={metallic:.2f}")
+        logger.debug(f"Material: color={teal_green_color[:3]}, roughness={roughness:.2f}, metallic={metallic:.2f}")
         
         return material
     

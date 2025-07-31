@@ -33,10 +33,10 @@ class LightingCameraController:
         self.camera_elevation_range = (-30, 30)       # Elevation angle (degrees)
         self.camera_azimuth_range = (0, 360)         # Azimuth angle (degrees)
         
-        # Lighting parameters
-        self.key_light_intensity_range = (500, 1500)   # Main light strength
-        self.fill_light_intensity_range = (200, 800)   # Fill light strength
-        self.rim_light_intensity_range = (300, 1000)   # Rim light strength
+        # Lighting parameters - reduced for balanced lighting with environment
+        self.key_light_intensity_range = (300, 800)    # Reduced main light strength
+        self.fill_light_intensity_range = (150, 400)   # Reduced fill light strength
+        self.rim_light_intensity_range = (200, 600)    # Reduced rim light strength
         
         logger.info("LightingCameraController initialized")
     
@@ -98,18 +98,24 @@ class LightingCameraController:
     
     def setup_lighting(self) -> None:
         """
-        Setup randomized three-point lighting system.
+        Setup balanced lighting system with environment lighting.
         """
         
         # Clear existing lights
         self._clear_existing_lights()
         
-        # Create three-point lighting setup
+        # Set up environment lighting first
+        self._setup_environment_lighting()
+        
+        # Create balanced three-point lighting setup
         key_light = self._create_key_light()
         fill_light = self._create_fill_light()
         rim_light = self._create_rim_light()
         
-        logger.debug("Three-point lighting system created")
+        # Add additional ambient lighting for even illumination
+        ambient_light = self._create_ambient_light()
+        
+        logger.debug("Balanced lighting system with environment lighting created")
     
     def _clear_existing_lights(self) -> None:
         """Remove all existing lights from the scene."""
@@ -320,3 +326,96 @@ class LightingCameraController:
         background.inputs['Strength'].default_value = 0.5
         
         logger.debug(f"World background set to: {color}")
+    
+    def _setup_environment_lighting(self) -> None:
+        """Setup environment lighting using world shader nodes."""
+        
+        world = bpy.context.scene.world
+        if not world:
+            world = bpy.data.worlds.new("World")
+            bpy.context.scene.world = world
+        
+        # Enable nodes
+        world.use_nodes = True
+        
+        # Clear existing nodes
+        world.node_tree.nodes.clear()
+        
+        # Add environment texture node
+        env_texture = world.node_tree.nodes.new(type='ShaderNodeTexEnvironment')
+        env_texture.location = (-300, 0)
+        
+        # Add background shader
+        background = world.node_tree.nodes.new(type='ShaderNodeBackground')
+        background.location = (0, 0)
+        
+        # Add world output
+        output = world.node_tree.nodes.new(type='ShaderNodeOutputWorld')
+        output.location = (300, 0)
+        
+        # Connect nodes
+        world.node_tree.links.new(env_texture.outputs['Color'], background.inputs['Color'])
+        world.node_tree.links.new(background.outputs['Background'], output.inputs['Surface'])
+        
+        # Set environment strength for balanced lighting
+        background.inputs['Strength'].default_value = 0.3
+        
+        # Create a simple gradient environment if no HDRI available
+        self._create_gradient_environment(world, env_texture)
+        
+        logger.debug("Environment lighting setup complete")
+
+    def _create_gradient_environment(self, world, env_texture) -> None:
+        """Create a simple gradient environment for even lighting."""
+        
+        # Add color ramp for gradient
+        color_ramp = world.node_tree.nodes.new(type='ShaderNodeValToRGB')
+        color_ramp.location = (-150, 0)
+        
+        # Add texture coordinate node
+        tex_coord = world.node_tree.nodes.new(type='ShaderNodeTexCoord')
+        tex_coord.location = (-600, 0)
+        
+        # Add mapping node for control
+        mapping = world.node_tree.nodes.new(type='ShaderNodeMapping')
+        mapping.location = (-450, 0)
+        
+        # Connect gradient nodes
+        world.node_tree.links.new(tex_coord.outputs['Generated'], mapping.inputs['Vector'])
+        world.node_tree.links.new(mapping.outputs['Vector'], color_ramp.inputs['Fac'])
+        world.node_tree.links.new(color_ramp.outputs['Color'], world.node_tree.nodes['Background'].inputs['Color'])
+        
+        # Set gradient colors (light gray to darker gray)
+        color_ramp.color_ramp.elements[0].color = (0.8, 0.8, 0.8, 1.0)  # Light gray
+        color_ramp.color_ramp.elements[1].color = (0.3, 0.3, 0.3, 1.0)  # Darker gray
+        
+        # Remove the environment texture node as we're using gradient
+        world.node_tree.nodes.remove(env_texture)
+
+    def _create_ambient_light(self) -> bpy.types.Object:
+        """
+        Create ambient light for even overall illumination.
+        
+        Returns:
+            Ambient light object
+        """
+        
+        # Create large area light for ambient illumination
+        bpy.ops.object.light_add(type='AREA')
+        ambient_light = bpy.context.active_object
+        ambient_light.name = "AmbientLight"
+        
+        # Set ambient light properties for even illumination
+        ambient_light.data.energy = 200  # Lower intensity for ambient fill
+        ambient_light.data.size = 8.0    # Large size for even coverage
+        
+        # Position above the scene for overall illumination
+        ambient_light.location = (0, 0, 8.0)
+        ambient_light.rotation_euler = (0, 0, 0)  # Point downward
+        
+        # Set neutral color
+        ambient_light.data.color = (1.0, 1.0, 1.0)
+        
+        logger.debug("Ambient light created for even illumination")
+        
+        return ambient_light
