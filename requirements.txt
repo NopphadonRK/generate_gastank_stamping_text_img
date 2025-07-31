@@ -1,4 +1,5 @@
-bpy>=4.0.0
+# Note: bpy comes with Blender, don't install via pip
+# bpy>=4.0.0
 Pillow>=9.0.0
 numpy>=1.21.0
 opencv-python>=4.5.0

@@ -135,7 +135,11 @@ class CylinderGenerator:
         bsdf.inputs['Base Color'].default_value = base_color
         bsdf.inputs['Roughness'].default_value = roughness
         bsdf.inputs['Metallic'].default_value = metallic
-        bsdf.inputs['Specular'].default_value = 0.5
+        # Note: Specular input removed in Blender 4.x, replaced by IOR
+        if 'Specular IOR' in bsdf.inputs:
+            bsdf.inputs['Specular IOR'].default_value = 1.5
+        elif 'IOR' in bsdf.inputs:
+            bsdf.inputs['IOR'].default_value = 1.5
         
         logger.debug(f"Material: color={base_color[:3]}, roughness={roughness:.2f}, metallic={metallic:.2f}")
         
