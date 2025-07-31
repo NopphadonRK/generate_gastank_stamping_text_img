@@ -33,10 +33,10 @@ class LightingCameraController:
         self.camera_elevation_range = (-30, 30)         # Elevation angle (degrees)
         self.camera_azimuth_range = (0, 360)           # Azimuth angle (degrees)
         
-        # Lighting parameters - reduced for balanced lighting with environment
-        self.key_light_intensity_range = (300, 800)    # Reduced main light strength
-        self.fill_light_intensity_range = (150, 400)   # Reduced fill light strength
-        self.rim_light_intensity_range = (200, 600)    # Reduced rim light strength
+        # Lighting parameters - moderate levels with reduced specular reflections from material
+        self.key_light_intensity_range = (200, 500)    # Increased from (100, 200)
+        self.fill_light_intensity_range = (80, 200)    # Increased from (30, 80)
+        self.rim_light_intensity_range = (120, 300)    # Increased from (50, 150)
         
         logger.info("LightingCameraController initialized")
     
@@ -323,7 +323,7 @@ class LightingCameraController:
             color = (gray_value, gray_value, gray_value)
         
         background.inputs['Color'].default_value = (*color, 1.0)
-        background.inputs['Strength'].default_value = 0.5
+        background.inputs['Strength'].default_value = 0.25  # Increased from 0.1 for visibility
         
         logger.debug(f"World background set to: {color}")
     
@@ -357,8 +357,8 @@ class LightingCameraController:
         world.node_tree.links.new(env_texture.outputs['Color'], background.inputs['Color'])
         world.node_tree.links.new(background.outputs['Background'], output.inputs['Surface'])
         
-        # Set environment strength for balanced lighting
-        background.inputs['Strength'].default_value = 0.3
+        # Set very low environment strength to minimize reflections and hotspots
+        background.inputs['Strength'].default_value = 0.08  # Reduced from 0.15 to minimize reflections
         
         # Create a simple gradient environment if no HDRI available
         self._create_gradient_environment(world, env_texture)
@@ -385,9 +385,9 @@ class LightingCameraController:
         world.node_tree.links.new(mapping.outputs['Vector'], color_ramp.inputs['Fac'])
         world.node_tree.links.new(color_ramp.outputs['Color'], world.node_tree.nodes['Background'].inputs['Color'])
         
-        # Set gradient colors (light gray to darker gray)
-        color_ramp.color_ramp.elements[0].color = (0.8, 0.8, 0.8, 1.0)  # Light gray
-        color_ramp.color_ramp.elements[1].color = (0.3, 0.3, 0.3, 1.0)  # Darker gray
+        # Set moderate gradient colors for visibility without harsh reflections
+        color_ramp.color_ramp.elements[0].color = (0.4, 0.4, 0.4, 1.0)  # Increased from 0.2 for visibility
+        color_ramp.color_ramp.elements[1].color = (0.15, 0.15, 0.15, 1.0)  # Increased from 0.05
         
         # Remove the environment texture node as we're using gradient
         world.node_tree.nodes.remove(env_texture)
@@ -405,8 +405,8 @@ class LightingCameraController:
         ambient_light = bpy.context.active_object
         ambient_light.name = "AmbientLight"
         
-        # Set ambient light properties for even illumination
-        ambient_light.data.energy = 200  # Lower intensity for ambient fill
+        # Set moderate ambient light energy for visibility without hotspots
+        ambient_light.data.energy = 80   # Increased from 20 for better visibility
         ambient_light.data.size = 8.0    # Large size for even coverage
         
         # Position above the scene for overall illumination of larger cylinders

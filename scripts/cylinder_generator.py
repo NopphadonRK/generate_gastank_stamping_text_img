@@ -118,16 +118,27 @@ class CylinderGenerator:
         # Clear default nodes
         material.node_tree.nodes.clear()
         
-        # Add principled BSDF shader
+        # Add principled BSDF shader (metallic component)
         bsdf = material.node_tree.nodes.new(type='ShaderNodeBsdfPrincipled')
         bsdf.location = (300, 0)
         
+        # Add diffuse BSDF shader (matte component) to further reduce reflections
+        diffuse_bsdf = material.node_tree.nodes.new(type='ShaderNodeBsdfDiffuse')
+        diffuse_bsdf.location = (300, -200)
+        
+        # Add mix shader to blend metallic and diffuse components
+        mix_shader = material.node_tree.nodes.new(type='ShaderNodeMixShader')
+        mix_shader.location = (500, 0)
+        mix_shader.inputs['Fac'].default_value = 0.3  # 30% metallic, 70% diffuse for ultra-matte finish
+        
         # Add material output
         output = material.node_tree.nodes.new(type='ShaderNodeOutputMaterial')
-        output.location = (600, 0)
+        output.location = (700, 0)
         
-        # Connect BSDF to output
-        material.node_tree.links.new(bsdf.outputs['BSDF'], output.inputs['Surface'])
+        # Connect shaders: mix metallic and diffuse, then to output
+        material.node_tree.links.new(bsdf.outputs['BSDF'], mix_shader.inputs[2])  # Metallic to second input
+        material.node_tree.links.new(diffuse_bsdf.outputs['BSDF'], mix_shader.inputs[1])  # Diffuse to first input
+        material.node_tree.links.new(mix_shader.outputs['Shader'], output.inputs['Surface'])
         
         # Add texture coordinate node
         tex_coord = material.node_tree.nodes.new(type='ShaderNodeTexCoord')
@@ -138,53 +149,93 @@ class CylinderGenerator:
         mapping.location = (-400, 0)
         mapping.inputs['Scale'].default_value = (8.0, 8.0, 8.0)  # Scale for mild texture detail
         
-        # Add noise texture for surface bumpiness
+        # Add noise texture for surface bumpiness (increased roughness)
         noise_texture = material.node_tree.nodes.new(type='ShaderNodeTexNoise')
         noise_texture.location = (-200, 0)
-        noise_texture.inputs['Scale'].default_value = 15.0      # Fine surface detail
-        noise_texture.inputs['Detail'].default_value = 3.0     # Moderate detail level
-        noise_texture.inputs['Roughness'].default_value = 0.6  # Balanced roughness in noise
-        noise_texture.inputs['Distortion'].default_value = 0.2 # Slight distortion for realism
+        noise_texture.inputs['Scale'].default_value = 20.0      # Finer surface detail for more texture
+        noise_texture.inputs['Detail'].default_value = 5.0     # Higher detail level for more complexity
+        noise_texture.inputs['Roughness'].default_value = 0.8  # Increased roughness in noise
+        noise_texture.inputs['Distortion'].default_value = 0.4 # More distortion for realistic industrial texture
+        
+        # Add second noise texture for additional surface complexity
+        noise_texture2 = material.node_tree.nodes.new(type='ShaderNodeTexNoise')
+        noise_texture2.location = (-200, -300)
+        noise_texture2.inputs['Scale'].default_value = 50.0     # Even finer detail
+        noise_texture2.inputs['Detail'].default_value = 2.0    # Lower detail for base variation
+        noise_texture2.inputs['Roughness'].default_value = 0.5 # Medium roughness
+        noise_texture2.inputs['Distortion'].default_value = 0.1 # Slight distortion
+        
+        # Add mix node to combine both noise textures
+        mix_node = material.node_tree.nodes.new(type='ShaderNodeMix')
+        mix_node.location = (-50, -150)
+        mix_node.data_type = 'RGBA'
+        mix_node.blend_type = 'MIX'
+        mix_node.inputs['Factor'].default_value = 0.3  # Blend factor for second noise
         
         # Add ColorRamp to control bump intensity
         color_ramp = material.node_tree.nodes.new(type='ShaderNodeValToRGB')
         color_ramp.location = (0, -200)
         
-        # Set color ramp for mild bump effect
-        color_ramp.color_ramp.elements[0].position = 0.4  # Compress range for subtlety  
-        color_ramp.color_ramp.elements[1].position = 0.6
+        # Set color ramp for more pronounced bump effect
+        color_ramp.color_ramp.elements[0].position = 0.3  # Wider range for more variation  
+        color_ramp.color_ramp.elements[1].position = 0.7
         color_ramp.color_ramp.elements[0].color = (0.0, 0.0, 0.0, 1.0)  # Black
         color_ramp.color_ramp.elements[1].color = (1.0, 1.0, 1.0, 1.0)  # White
         
-        # Add bump node for surface displacement
+        # Add bump node for surface displacement (increased strength)
         bump_node = material.node_tree.nodes.new(type='ShaderNodeBump')
         bump_node.location = (150, -200)
-        bump_node.inputs['Strength'].default_value = 0.1  # Mild bump strength
+        bump_node.inputs['Strength'].default_value = 0.25  # Increased bump strength for more roughness
         
-        # Connect texture nodes
+        # Connect texture nodes (with dual noise for enhanced roughness)
         material.node_tree.links.new(tex_coord.outputs['Generated'], mapping.inputs['Vector'])
         material.node_tree.links.new(mapping.outputs['Vector'], noise_texture.inputs['Vector'])
-        material.node_tree.links.new(noise_texture.outputs['Fac'], color_ramp.inputs['Fac'])
+        material.node_tree.links.new(mapping.outputs['Vector'], noise_texture2.inputs['Vector'])
+        material.node_tree.links.new(noise_texture.outputs['Fac'], mix_node.inputs['A'])
+        material.node_tree.links.new(noise_texture2.outputs['Fac'], mix_node.inputs['B'])
+        material.node_tree.links.new(mix_node.outputs['Result'], color_ramp.inputs['Fac'])
         material.node_tree.links.new(color_ramp.outputs['Color'], bump_node.inputs['Height'])
+        
+        # Connect normals to both shaders
         material.node_tree.links.new(bump_node.outputs['Normal'], bsdf.inputs['Normal'])
+        material.node_tree.links.new(bump_node.outputs['Normal'], diffuse_bsdf.inputs['Normal'])
         
-        # Set glossy teal-green material properties
+        # Set teal-green material properties with MAXIMUM anti-reflective settings
         teal_green_color = (0.188, 0.529, 0.482, 1.0)  # #30877b converted to linear RGB
-        roughness = 0.1  # Low roughness for glossy surface
-        metallic = 0.8   # High metallic value for reflective appearance
+        roughness = 0.95  # EXTREMELY HIGH roughness to eliminate all specular reflections
+        metallic = 0.15   # VERY LOW metallic to minimize reflectivity
         
-        # Set material properties
+        # Set material properties for metallic component
         bsdf.inputs['Base Color'].default_value = teal_green_color
         bsdf.inputs['Roughness'].default_value = roughness
         bsdf.inputs['Metallic'].default_value = metallic
         
-        # Standard metallic properties for Blender 4.x
-        if 'Specular IOR' in bsdf.inputs:
-            bsdf.inputs['Specular IOR'].default_value = 1.5
-        elif 'IOR' in bsdf.inputs:
-            bsdf.inputs['IOR'].default_value = 1.5
+        # Set material properties for diffuse component (same color)
+        diffuse_bsdf.inputs['Color'].default_value = teal_green_color
         
-        logger.debug(f"Material: color={teal_green_color[:3]}, roughness={roughness:.2f}, metallic={metallic:.2f}, bump=mild")
+        # ANTI-REFLECTIVE settings for Blender 4.x - minimize all reflection sources
+        if 'Specular IOR' in bsdf.inputs:
+            bsdf.inputs['Specular IOR'].default_value = 1.0  # MINIMUM IOR to reduce reflections
+        elif 'IOR' in bsdf.inputs:
+            bsdf.inputs['IOR'].default_value = 1.0  # MINIMUM IOR
+            
+        # Remove any clearcoat effects that could cause bright spots
+        if 'Clearcoat' in bsdf.inputs:
+            bsdf.inputs['Clearcoat'].default_value = 0.0  # NO clearcoat
+        if 'Clearcoat Roughness' in bsdf.inputs:
+            bsdf.inputs['Clearcoat Roughness'].default_value = 1.0  # Maximum clearcoat roughness
+            
+        # Minimize specular effects
+        if 'Specular Tint' in bsdf.inputs:
+            bsdf.inputs['Specular Tint'].default_value = (0.0, 0.0, 0.0, 1.0)  # No specular tint (black)
+        if 'Specular' in bsdf.inputs:
+            bsdf.inputs['Specular'].default_value = 0.0  # Minimum specular reflection
+            
+        # Remove sheen effects
+        if 'Sheen' in bsdf.inputs:
+            bsdf.inputs['Sheen'].default_value = 0.0  # No sheen effect
+        
+        logger.debug(f"Material: color={teal_green_color[:3]}, roughness={roughness:.2f}, metallic={metallic:.2f}, anti-reflective=maximum")
         
         return material
     
