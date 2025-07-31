@@ -10,11 +10,14 @@ This project creates realistic 3D rendered images of industrial gas cylinders wi
 
 - **Realistic 3D Gas Cylinder Models**: Procedurally generated with proper proportions
 - **Authentic Debossing Effects**: Text appears physically stamped into the metal surface
-- **Dynamic Lighting**: Randomized lighting setups create realistic shadows and highlights
+- **FreesiaUPC Font Integration**: Uses Thai-style FreesiaUPC font for clear numeric text
+- **Dynamic Lighting**: Randomized three-point lighting creates realistic shadows and highlights
 - **Camera Variations**: Multiple viewing angles and perspectives per text sample
 - **Material Randomization**: Various metallic and plastic finishes with industrial color schemes
 - **Batch Processing**: Automated generation of thousands of training images
 - **Ground Truth Generation**: Automatic creation of corresponding text labels
+- **Utility Scripts**: Complete set of management and testing tools
+- **Pattern Support**: Optimized for xxxx-xxxxxx numeric patterns
 
 ## 🛠️ Technology Stack
 
@@ -28,21 +31,29 @@ This project creates realistic 3D rendered images of industrial gas cylinders wi
 ```
 generate_gastank_stamping_text_img/
 ├── data/
-│   └── dict.txt                 # Text strings for stamping
+│   └── dict.txt                 # Text strings for stamping (xxxx-xxxxxx pattern)
 ├── fonts/
 │   ├── industrial/              # Industrial-style fonts
 │   ├── monospace/               # Monospaced fonts for stamps
-│   └── default/                 # Default system fonts backup
+│   ├── default/                 # Default system fonts backup
+│   │   ├── FreesiaUPC.ttf      # Thai-style font (included)
+│   │   └── FreesiabUPC.ttf     # FreesiaUPC Bold (included)
+│   └── README.md               # Font management guide
 ├── output/
 │   ├── images/                  # Generated PNG images
-│   └── labels/                  # Ground truth text files
+│   ├── labels/                  # Ground truth text files
+│   └── README.md               # Dataset usage guide
 ├── scripts/
 │   ├── main.py                  # Main execution script
 │   ├── cylinder_generator.py    # 3D cylinder model creation
 │   ├── text_embosser.py         # Text debossing effects
 │   ├── lighting_camera.py       # Scene lighting and camera control
 │   └── utils.py                 # Helper utilities
-├── requirements.txt             # Python dependencies
+├── venv/                       # Python virtual environment
+├── clean_output.sh             # Remove generated files script
+├── quick_commands.sh           # Development utilities menu
+├── test.sh                     # Comprehensive test suite
+├── requirements.txt            # Python dependencies
 └── README.md
 ```
 
@@ -66,41 +77,62 @@ generate_gastank_stamping_text_img/
 
 3. **Install Python Dependencies**
    ```bash
+   # Create and activate virtual environment
+   python3 -m venv venv
+   source venv/bin/activate
+   
+   # Install dependencies
    pip install -r requirements.txt
+   ```
+
+4. **Verify Installation**
+   ```bash
+   # Run comprehensive tests
+   ./test.sh
+   
+   # Or check system status
+   ./quick_commands.sh
    ```
 
 ### Basic Usage
 
 1. **Prepare Text Dictionary**
    ```bash
-   # Create data/dict.txt with your text samples (one per line)
-   echo "ACMEGAS123" > data/dict.txt
-   echo "FIREEXT1A" >> data/dict.txt
-   echo "GASCO-X7Y" >> data/dict.txt
+   # The project includes dict.txt with 100 xxxx-xxxxxx patterns
+   # Example patterns: 6302-844353, 2417-001227, 3634-299252
+   head -5 data/dict.txt
    ```
 
-2. **Setup Fonts (Optional)**
+2. **Quick Start - Use Utility Scripts**
    ```bash
-   # Add industrial fonts to fonts/ directory for realistic stamping
-   # Recommended: Arial, Helvetica, Courier New, or similar monospace fonts
-   # The system will use default fonts if custom fonts are not provided
-   ```
-
-3. **Generate Dataset**
-   ```bash
-   # Generate 100 images with default settings
-   blender --background --python scripts/main.py -- --count 100 --dict data/dict.txt
+   # Interactive menu with common operations
+   ./quick_commands.sh
    
-   # Or with custom parameters
-   blender --background --python scripts/main.py -- \
-     --count 1000 \
-     --dict data/dict.txt \
-     --output output/ \
-     --resolution 1024 512 \
-     --font-dir fonts/industrial/
+   # Clean previous outputs
+   ./clean_output.sh
+   
+   # Run comprehensive tests
+   ./test.sh
    ```
 
-4. **Check Results**
+3. **Generate Dataset - Small Batch**
+   ```bash
+   # Generate 5 images (fast test)
+   /Applications/Blender.app/Contents/MacOS/Blender \
+     --background --python scripts/main.py -- \
+     --count 5 --dict data/dict.txt --samples 32
+   ```
+
+4. **Generate Dataset - Production**
+   ```bash
+   # Generate 100+ images with high quality
+   /Applications/Blender.app/Contents/MacOS/Blender \
+     --background --python scripts/main.py -- \
+     --count 100 --dict data/dict.txt \
+     --samples 64 --resolution 1024 512
+   ```
+
+5. **Check Results**
    ```bash
    ls output/images/    # Generated PNG images
    ls output/labels/    # Corresponding text files
@@ -115,8 +147,35 @@ The tool creates realistic variations including:
 - **Material Diversity**: Blue, gray, green, red cylinders with varying surface finishes
 - **Text Positioning**: Randomized vertical placement on cylinder surface
 - **Deboss Depth**: Subtle variations in stamping depth for realism
+- **FreesiaUPC Font**: Clear, readable Thai-style font optimized for numeric patterns
 
-Sample naming: `ACMEGAS123_001.png`, `FIREEXT1A_045.png`
+Sample naming: `6302-844353_001.png`, `2417-001227_045.png`
+
+## 🛠️ Utility Scripts
+
+### Development Tools
+
+```bash
+# Interactive development menu
+./quick_commands.sh
+
+# Clean all generated outputs
+./clean_output.sh
+
+# Run comprehensive test suite
+./test.sh
+```
+
+### Quick Commands Menu Options:
+1. 🧪 Run tests (validation and benchmarking)
+2. 🧹 Clean output (remove all generated files)
+3. 📊 Show current status (system and generation stats)
+4. 🎯 Generate small batch (5 images - quick test)
+5. 🎯 Generate medium batch (20 images)
+6. 🎯 Generate large batch (100 images)
+7. 🔍 Preview latest generated images
+8. 📈 Show generation statistics
+9. 🚀 Custom generation (user-defined parameters)
 
 ## ⚙️ Configuration Options
 
@@ -157,17 +216,20 @@ Sample naming: `ACMEGAS123_001.png`, `FIREEXT1A_045.png`
 
 ## 🔧 Development
 
-### Setting up Development Environment
+### Development Environment Setup
 
 ```bash
-# Install development dependencies
-pip install -r requirements-dev.txt
+# Activate virtual environment
+source venv/bin/activate
 
-# Run tests
-python -m pytest tests/
+# Install development dependencies (if needed)
+pip install --upgrade pip
 
-# Format code
-black scripts/
+# Run all tests before development
+./test.sh
+
+# Clean outputs for fresh start
+./clean_output.sh
 ```
 
 ### Adding New Features
@@ -175,13 +237,25 @@ black scripts/
 1. **Custom Materials**: Modify `cylinder_generator.py` to add new surface materials
 2. **Text Effects**: Extend `text_embosser.py` for different stamping styles
 3. **Scene Variations**: Update `lighting_camera.py` for new camera/lighting setups
+4. **New Fonts**: Add font files to appropriate `fonts/` subdirectories
+5. **Testing**: Always run `./test.sh` after changes
+6. **Documentation**: Update README.md when adding new features
 
 ## 📈 Performance Notes
 
-- **Rendering Speed**: ~10-30 seconds per image (depends on quality settings)
+- **Rendering Speed**: ~5-15 seconds per image (depends on quality settings and system)
 - **Memory Usage**: ~2-4GB RAM for standard scenes
-- **GPU Acceleration**: Supports CUDA/OpenCL for faster rendering
+- **GPU Acceleration**: Supports CUDA/OpenCL for faster rendering (if available)
 - **Batch Processing**: Designed for unattended generation of large datasets
+- **Sample Quality**: 16 samples = fast preview, 32 = balanced, 64+ = high quality
+- **Resolution Impact**: 256x128 = 2x faster than 512x256, 4x faster than 1024x512
+
+### Benchmarking Results
+
+The included `test.sh` script provides performance benchmarking:
+- **5 images @ 256x128, 16 samples**: ~30-60 seconds total
+- **Acceptable performance**: < 60s for 5 images
+- **Good performance**: < 30s for 5 images
 
 ## 🤝 Contributing
 

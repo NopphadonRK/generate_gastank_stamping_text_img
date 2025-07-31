@@ -166,9 +166,38 @@ def get_random_font(font_list):
 - Implement progress tracking for long batch jobs
 - Consider GPU acceleration for faster rendering
 
+### Documentation Management Rules
+
+#### Always Update README.md When:
+- Adding new scripts or modules
+- Modifying existing functionality
+- Adding new dependencies or requirements
+- Changing project structure
+- Adding new features or capabilities
+- Updating installation or usage instructions
+- Adding utility scripts or tools
+
+#### README Update Guidelines:
+- Keep feature lists current with actual implementation
+- Update command examples to reflect real usage
+- Document all executable scripts and their purposes
+- Maintain accurate project structure diagrams
+- Update prerequisites and installation steps
+- Include new utility scripts in usage section
+- Verify all examples work with current codebase
+
+#### Git Workflow for Documentation:
+- Always commit README updates together with code changes
+- Use descriptive commit messages that mention documentation updates
+- Ensure README reflects the current state of the project
+- Review README accuracy before each major commit
+
 ## When Helping with This Project
 1. Focus on Blender Python API (bpy) usage
 2. Emphasize realistic 3D rendering techniques
 3. Consider OCR training data quality requirements
 4. Maintain consistency in randomization parameters
 5. Ensure proper file I/O and batch processing patterns
+6. **Always update README.md when adding new features, scripts, or significant changes**
+7. **Update documentation to reflect current project capabilities and usage**
+8. **Keep README.md synchronized with actual project structure and functionality**
