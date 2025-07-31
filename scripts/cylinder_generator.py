@@ -75,48 +75,31 @@ class CylinderGenerator:
         
         logger.info(f"Creating {config['name']} (h={height:.2f}, r={radius:.2f})")
         
-        # Create cylinder mesh with high vertex count for smooth surface
+        # Create perfect geometric cylinder with clean circular bases
         bpy.ops.mesh.primitive_cylinder_add(
             radius=radius,
             depth=height,
             location=(0, 0, height/2),  # Position bottom at origin
-            vertices=64  # Higher vertex count for smoother circular cross-section
+            vertices=32  # Optimal vertex count for perfect circular geometry
         )
         
         cylinder = bpy.context.active_object
         cylinder.name = f"GasCylinder_{size_type}"
         
-        # Enter edit mode to improve geometry and prevent tip deformation
+        # Apply smooth shading to the lateral surface only
         bpy.context.view_layer.objects.active = cylinder
         bpy.ops.object.mode_set(mode='EDIT')
         
-        # Select all and apply smooth shading first
+        # Select all faces and apply smooth shading for clean surface
         bpy.ops.mesh.select_all(action='SELECT')
         bpy.ops.mesh.faces_shade_smooth()
         
-        # Add supporting edge loops using inset faces method (more stable)
-        bpy.ops.mesh.select_all(action='DESELECT')
-        bpy.ops.mesh.select_mode(type='FACE')
-        
-        # Select top face and inset to create supporting geometry
-        bpy.ops.mesh.select_all(action='DESELECT')
-        # This approach is more stable than complex loop cuts
-        
-        # Exit edit mode
+        # Exit edit mode - keep perfect geometric form
         bpy.ops.object.mode_set(mode='OBJECT')
-        
-        # Add subdivision surface modifier for extra smoothness
-        subdivision_mod = cylinder.modifiers.new(name="Subdivision", type='SUBSURF')
-        subdivision_mod.levels = 2  # Higher subdivision for smoother metallic surface
-        subdivision_mod.render_levels = 3  # Even higher quality for final render
-        subdivision_mod.use_limit_surface = True  # Better surface quality
         
         # Create and apply material
         material = self._create_cylinder_material()
         cylinder.data.materials.append(material)
-        
-        # Add top and bottom caps with realistic details
-        self._add_cylinder_caps(cylinder, radius, height)
         
         return cylinder
     
@@ -146,86 +129,25 @@ class CylinderGenerator:
         # Connect BSDF to output
         material.node_tree.links.new(bsdf.outputs['BSDF'], output.inputs['Surface'])
         
-        # Randomize material properties for realistic metallic finish
+        # Randomize material properties for clean geometric appearance
         base_color = random.choice(self.industrial_colors)
-        roughness = random.uniform(0.1, 0.4)  # Lower roughness for more metallic appearance
-        metallic = random.uniform(0.8, 1.0)   # Higher metallic values for metal cylinders
+        roughness = random.uniform(0.3, 0.7)  # Balanced roughness for geometric clarity
+        metallic = random.uniform(0.6, 0.9)   # Moderate metallic values for clean appearance
         
         # Set material properties
         bsdf.inputs['Base Color'].default_value = base_color
         bsdf.inputs['Roughness'].default_value = roughness
         bsdf.inputs['Metallic'].default_value = metallic
         
-        # Enhanced metallic properties for Blender 4.x
+        # Standard metallic properties for Blender 4.x
         if 'Specular IOR' in bsdf.inputs:
             bsdf.inputs['Specular IOR'].default_value = 1.5
         elif 'IOR' in bsdf.inputs:
             bsdf.inputs['IOR'].default_value = 1.5
-            
-        # Add slight subsurface scattering for more realistic metal
-        if 'Subsurface Weight' in bsdf.inputs:
-            bsdf.inputs['Subsurface Weight'].default_value = 0.01
-        elif 'Subsurface' in bsdf.inputs:
-            bsdf.inputs['Subsurface'].default_value = 0.01
         
         logger.debug(f"Material: color={base_color[:3]}, roughness={roughness:.2f}, metallic={metallic:.2f}")
         
         return material
-    
-    def _add_cylinder_caps(self, cylinder: bpy.types.Object, radius: float, height: float) -> None:
-        """
-        Add realistic top and bottom caps to the cylinder.
-        
-        Args:
-            cylinder: The main cylinder object
-            radius: Cylinder radius
-            height: Cylinder height
-        """
-        
-        # Add top cap (valve area) with better geometry
-        bpy.ops.mesh.primitive_cylinder_add(
-            radius=radius * 0.9,
-            depth=0.1,
-            location=(0, 0, height + 0.05),
-            vertices=64  # Match main cylinder vertex count
-        )
-        
-        top_cap = bpy.context.active_object
-        top_cap.name = "TopCap"
-        
-        # Apply smooth shading to top cap
-        bpy.context.view_layer.objects.active = top_cap
-        bpy.ops.object.mode_set(mode='EDIT')
-        bpy.ops.mesh.select_all(action='SELECT')
-        bpy.ops.mesh.faces_shade_smooth()
-        bpy.ops.object.mode_set(mode='OBJECT')
-        
-        # Add bottom cap (base) with beveled edge
-        bpy.ops.mesh.primitive_cylinder_add(
-            radius=radius * 0.95,
-            depth=0.05,
-            location=(0, 0, 0.025),
-            vertices=64  # Match main cylinder vertex count
-        )
-        
-        bottom_cap = bpy.context.active_object
-        bottom_cap.name = "BottomCap"
-        
-        # Apply smooth shading to bottom cap
-        bpy.context.view_layer.objects.active = bottom_cap
-        bpy.ops.object.mode_set(mode='EDIT')
-        bpy.ops.mesh.select_all(action='SELECT')
-        bpy.ops.mesh.faces_shade_smooth()
-        bpy.ops.object.mode_set(mode='OBJECT')
-        
-        # Join caps with main cylinder
-        bpy.ops.object.select_all(action='DESELECT')
-        cylinder.select_set(True)
-        top_cap.select_set(True)
-        bottom_cap.select_set(True)
-        bpy.context.view_layer.objects.active = cylinder
-        
-        bpy.ops.object.join()
     
     def get_text_placement_area(self, cylinder: bpy.types.Object) -> Tuple[float, float]:
         """

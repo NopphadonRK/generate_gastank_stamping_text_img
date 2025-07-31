@@ -8,12 +8,12 @@ This project creates realistic 3D rendered images of industrial gas cylinders wi
 
 ## ✨ Features
 
-- **Realistic 3D Gas Cylinder Models**: Procedurally generated with proper proportions and ultra-smooth metallic surfaces
-- **Advanced Surface Quality**: High-vertex meshes (64 vertices) with dual subdivision surfaces and smooth shading
+- **Perfect Geometric Cylinders**: Clean mathematical cylinders with identical circular bases and smooth lateral surfaces
+- **Maintained Geometric Integrity**: No subdivision modifiers or deformation - pure geometric form
 - **Authentic Debossing Effects**: Text appears physically stamped into the metal surface
-- **Enhanced Metallic Materials**: Realistic PBR materials with proper metallic/roughness values for industrial finishes
+- **Balanced Material Properties**: Realistic PBR materials optimized for geometric clarity
 - **FreesiaUPC Font Integration**: Uses Thai-style FreesiaUPC font for clear numeric text
-- **Professional Caps Design**: Properly beveled top and bottom caps with matching vertex counts
+- **Clean Surface Rendering**: Smooth shading on lateral surfaces with preserved edge definition
 - **Dynamic Lighting**: Randomized three-point lighting creates realistic shadows and highlights
 - **Camera Variations**: Multiple viewing angles and perspectives per text sample
 - **Material Randomization**: Various metallic and plastic finishes with industrial color schemes
@@ -201,8 +201,8 @@ Sample naming: `6302-844353_001.png`, `2417-001227_045.png`
 - **Lighting**: 2-3 randomized light sources with varying intensity
 - **Text Placement**: Middle 60% of cylinder height
 - **Deboss Depth**: 0.001-0.005 Blender units
-- **Materials**: Enhanced metallic PBR materials with optimized roughness (0.1-0.4) and metallic values (0.8-1.0)
-- **Surface Quality**: Ultra-smooth 64-vertex meshes with dual subdivision surfaces and proper edge flow
+- **Materials**: Balanced PBR properties with moderate roughness (0.3-0.7) and metallic values (0.6-0.9)
+- **Surface Quality**: Perfect geometric cylinders with 32-vertex circular bases and clean lateral surfaces
 
 ## 📊 Dataset Specifications
 
@@ -238,12 +238,12 @@ pip install --upgrade pip
 
 ### Adding New Features
 
-1. **Custom Materials**: Modify `cylinder_generator.py` to add new surface materials and metallic properties
+1. **Custom Materials**: Modify `cylinder_generator.py` to add new surface materials and balanced PBR properties
 2. **Text Effects**: Extend `text_embosser.py` for different stamping styles
 3. **Scene Variations**: Update `lighting_camera.py` for new camera/lighting setups
 4. **New Fonts**: Add font files to appropriate `fonts/` subdirectories
-5. **Surface Quality**: Adjust vertex count, subdivision levels, metallic values, and surface smoothness in `cylinder_generator.py`
-6. **Edge Flow**: Modify geometry creation for better subdivision surface results
+5. **Geometric Quality**: Adjust vertex count and material properties while maintaining perfect geometric form
+6. **Clean Surfaces**: Preserve geometric integrity without subdivision or deformation modifiers
 7. **Testing**: Always run `./test.sh` after changes
 8. **Documentation**: Update README.md when adding new features
 
