@@ -28,12 +28,12 @@ class CylinderGenerator:
     def __init__(self):
         """Initialize the cylinder generator with default parameters."""
         
-        # Standard gas cylinder proportions (height:diameter ratios)
+        # Standard gas cylinder proportions (height:diameter ratios) - increased radius for larger appearance
         self.cylinder_configs = {
-            'small': {'height': 2.0, 'radius': 0.4, 'name': 'Small Tank'},
-            'medium': {'height': 3.0, 'radius': 0.5, 'name': 'Medium Tank'},
-            'large': {'height': 4.0, 'radius': 0.6, 'name': 'Large Tank'},
-            'industrial': {'height': 5.0, 'radius': 0.7, 'name': 'Industrial Tank'}
+            'small': {'height': 2.0, 'radius': 0.6, 'name': 'Small Tank'},      # Increased from 0.4
+            'medium': {'height': 3.0, 'radius': 0.8, 'name': 'Medium Tank'},    # Increased from 0.5
+            'large': {'height': 4.0, 'radius': 1.0, 'name': 'Large Tank'},      # Increased from 0.6
+            'industrial': {'height': 5.0, 'radius': 1.2, 'name': 'Industrial Tank'}  # Increased from 0.7
         }
         
         # Industrial color palette for gas cylinders
@@ -105,10 +105,10 @@ class CylinderGenerator:
     
     def _create_cylinder_material(self) -> bpy.types.Material:
         """
-        Create a realistic PBR material for the gas cylinder.
+        Create a realistic PBR material for the gas cylinder with mild surface bumpiness.
         
         Returns:
-            Blender material with metallic/plastic properties
+            Blender material with metallic/plastic properties and surface texture
         """
         
         # Create new material
@@ -120,14 +120,53 @@ class CylinderGenerator:
         
         # Add principled BSDF shader
         bsdf = material.node_tree.nodes.new(type='ShaderNodeBsdfPrincipled')
-        bsdf.location = (0, 0)
+        bsdf.location = (300, 0)
         
         # Add material output
         output = material.node_tree.nodes.new(type='ShaderNodeOutputMaterial')
-        output.location = (300, 0)
+        output.location = (600, 0)
         
         # Connect BSDF to output
         material.node_tree.links.new(bsdf.outputs['BSDF'], output.inputs['Surface'])
+        
+        # Add texture coordinate node
+        tex_coord = material.node_tree.nodes.new(type='ShaderNodeTexCoord')
+        tex_coord.location = (-600, 0)
+        
+        # Add mapping node for texture control
+        mapping = material.node_tree.nodes.new(type='ShaderNodeMapping')
+        mapping.location = (-400, 0)
+        mapping.inputs['Scale'].default_value = (8.0, 8.0, 8.0)  # Scale for mild texture detail
+        
+        # Add noise texture for surface bumpiness
+        noise_texture = material.node_tree.nodes.new(type='ShaderNodeTexNoise')
+        noise_texture.location = (-200, 0)
+        noise_texture.inputs['Scale'].default_value = 15.0      # Fine surface detail
+        noise_texture.inputs['Detail'].default_value = 3.0     # Moderate detail level
+        noise_texture.inputs['Roughness'].default_value = 0.6  # Balanced roughness in noise
+        noise_texture.inputs['Distortion'].default_value = 0.2 # Slight distortion for realism
+        
+        # Add ColorRamp to control bump intensity
+        color_ramp = material.node_tree.nodes.new(type='ShaderNodeValToRGB')
+        color_ramp.location = (0, -200)
+        
+        # Set color ramp for mild bump effect
+        color_ramp.color_ramp.elements[0].position = 0.4  # Compress range for subtlety  
+        color_ramp.color_ramp.elements[1].position = 0.6
+        color_ramp.color_ramp.elements[0].color = (0.0, 0.0, 0.0, 1.0)  # Black
+        color_ramp.color_ramp.elements[1].color = (1.0, 1.0, 1.0, 1.0)  # White
+        
+        # Add bump node for surface displacement
+        bump_node = material.node_tree.nodes.new(type='ShaderNodeBump')
+        bump_node.location = (150, -200)
+        bump_node.inputs['Strength'].default_value = 0.1  # Mild bump strength
+        
+        # Connect texture nodes
+        material.node_tree.links.new(tex_coord.outputs['Generated'], mapping.inputs['Vector'])
+        material.node_tree.links.new(mapping.outputs['Vector'], noise_texture.inputs['Vector'])
+        material.node_tree.links.new(noise_texture.outputs['Fac'], color_ramp.inputs['Fac'])
+        material.node_tree.links.new(color_ramp.outputs['Color'], bump_node.inputs['Height'])
+        material.node_tree.links.new(bump_node.outputs['Normal'], bsdf.inputs['Normal'])
         
         # Set glossy teal-green material properties
         teal_green_color = (0.188, 0.529, 0.482, 1.0)  # #30877b converted to linear RGB
@@ -145,7 +184,7 @@ class CylinderGenerator:
         elif 'IOR' in bsdf.inputs:
             bsdf.inputs['IOR'].default_value = 1.5
         
-        logger.debug(f"Material: color={teal_green_color[:3]}, roughness={roughness:.2f}, metallic={metallic:.2f}")
+        logger.debug(f"Material: color={teal_green_color[:3]}, roughness={roughness:.2f}, metallic={metallic:.2f}, bump=mild")
         
         return material
     

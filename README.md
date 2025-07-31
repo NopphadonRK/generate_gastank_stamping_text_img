@@ -8,13 +8,15 @@ This project creates realistic 3D rendered images of industrial gas cylinders wi
 
 ## ✨ Features
 
-- **Perfect Geometric Cylinders**: Clean mathematical cylinders with identical circular bases and smooth lateral surfaces
+- **Large Perfect Geometric Cylinders**: Increased radius (50% larger) for more prominent visual presence
+- **Mild Surface Bumpiness**: Realistic noise texture with subtle bump mapping for authentic industrial appearance  
 - **Glossy Teal-Green Material**: Distinctive #30877b teal-green color with high-gloss metallic finish (roughness 0.1, metallic 0.8)
-- **Balanced Environment Lighting**: Advanced lighting system with gradient environment, ambient light, and reduced intensity three-point lighting
-- **Maintained Geometric Integrity**: No subdivision modifiers or deformation - pure geometric form
+- **Balanced Environment Lighting**: Advanced lighting system with gradient environment, ambient light, and optimized three-point lighting
+- **Maintained Geometric Integrity**: No subdivision modifiers or deformation - pure geometric form with surface texture
 - **Authentic Debossing Effects**: Text appears physically stamped into the metal surface
 - **FreesiaUPC Font Integration**: Uses Thai-style FreesiaUPC font for clear numeric text
 - **Even Illumination**: Environment lighting and ambient fill eliminate harsh shadows and bright spots
+- **Optimized Camera Positioning**: Adjusted distances for larger cylinder dimensions
 - **Dynamic Lighting**: Randomized three-point lighting creates realistic shadows and highlights
 - **Camera Variations**: Multiple viewing angles and perspectives per text sample
 - **Batch Processing**: Automated generation of thousands of training images
@@ -200,10 +202,12 @@ Sample naming: `6302-844353_001.png`, `2417-001227_045.png`
 - **Camera Position**: 360° azimuth, ±30° elevation
 - **Lighting**: 2-3 randomized light sources with varying intensity
 - **Text Placement**: Middle 60% of cylinder height
+- **Cylinder Dimensions**: Increased radius by 50% (Small: 0.6, Medium: 0.8, Large: 1.0, Industrial: 1.2)
+- **Surface Texture**: Mild noise-based bump mapping with 0.1 strength for realistic industrial surface
 - **Deboss Depth**: 0.001-0.005 Blender units
 - **Material**: Fixed glossy teal-green (#30877b) with low roughness (0.1) and high metallic (0.8) for reflective appearance
-- **Lighting**: Balanced environment lighting with gradient background, ambient fill, and reduced three-point lighting intensities
-- **Surface Quality**: Perfect geometric cylinders with 32-vertex circular bases and clean lateral surfaces
+- **Lighting**: Balanced environment lighting with gradient background, ambient fill, and adjusted distances for larger cylinders
+- **Camera Positioning**: Increased distance range (4.0-8.0) to accommodate larger cylinder dimensions
 
 ## 📊 Dataset Specifications
 
@@ -239,15 +243,17 @@ pip install --upgrade pip
 
 ### Adding New Features
 
-1. **Material Customization**: Modify `cylinder_generator.py` to adjust teal-green color, roughness, and metallic properties
-2. **Lighting Enhancements**: Update `lighting_camera.py` to adjust environment lighting, ambient fill, and three-point lighting balance
-3. **Text Effects**: Extend `text_embosser.py` for different stamping styles
-4. **Scene Variations**: Update camera positioning and lighting setups
-5. **New Fonts**: Add font files to appropriate `fonts/` subdirectories
-6. **Environment Control**: Modify gradient environment or add HDRI support in lighting setup
-7. **Geometric Quality**: Maintain perfect cylinder form while adjusting material appearance
-8. **Testing**: Always run `./test.sh` after changes
-9. **Documentation**: Update README.md when adding new features
+1. **Material Customization**: Modify `cylinder_generator.py` to adjust teal-green color, surface texture, roughness, and metallic properties
+2. **Surface Texture Control**: Adjust noise texture parameters (scale, detail, roughness, distortion) and bump strength for surface variations
+3. **Cylinder Dimensions**: Modify radius values in cylinder_configs for different size requirements
+4. **Lighting Enhancements**: Update `lighting_camera.py` to adjust environment lighting, ambient fill, and lighting distances
+5. **Camera Positioning**: Adjust camera distance ranges to accommodate different cylinder sizes
+6. **Text Effects**: Extend `text_embosser.py` for different stamping styles
+7. **Scene Variations**: Update camera positioning and lighting setups
+8. **New Fonts**: Add font files to appropriate `fonts/` subdirectories
+9. **Environment Control**: Modify gradient environment or add HDRI support in lighting setup
+10. **Testing**: Always run `./test.sh` after changes
+11. **Documentation**: Update README.md when adding new features
 
 ## 📈 Performance Notes
 

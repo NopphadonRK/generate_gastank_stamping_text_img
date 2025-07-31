@@ -28,10 +28,10 @@ class LightingCameraController:
     def __init__(self):
         """Initialize the lighting and camera controller."""
         
-        # Camera positioning parameters
-        self.camera_distance_range = (3.0, 6.0)      # Distance from cylinder
-        self.camera_elevation_range = (-30, 30)       # Elevation angle (degrees)
-        self.camera_azimuth_range = (0, 360)         # Azimuth angle (degrees)
+        # Camera positioning parameters - adjusted for larger cylinder radius
+        self.camera_distance_range = (4.0, 8.0)        # Increased distance for larger cylinders
+        self.camera_elevation_range = (-30, 30)         # Elevation angle (degrees)
+        self.camera_azimuth_range = (0, 360)           # Azimuth angle (degrees)
         
         # Lighting parameters - reduced for balanced lighting with environment
         self.key_light_intensity_range = (300, 800)    # Reduced main light strength
@@ -148,7 +148,7 @@ class LightingCameraController:
         azimuth = math.radians(random.uniform(0, 360))
         
         # Position light
-        distance = 8.0  # Sun lights work at any distance
+        distance = 10.0  # Increased distance for larger cylinders
         x = distance * math.cos(elevation) * math.cos(azimuth)
         y = distance * math.cos(elevation) * math.sin(azimuth)
         z = distance * math.sin(elevation)
@@ -190,7 +190,7 @@ class LightingCameraController:
         fill_elevation = math.radians(random.uniform(10, 40))
         fill_azimuth = math.radians(random.uniform(120, 240))  # Opposite side
         
-        distance = random.uniform(4.0, 7.0)
+        distance = random.uniform(5.0, 9.0)  # Increased for larger cylinders
         x = distance * math.cos(fill_elevation) * math.cos(fill_azimuth)
         y = distance * math.cos(fill_elevation) * math.sin(fill_azimuth)
         z = distance * math.sin(fill_elevation)
@@ -231,7 +231,7 @@ class LightingCameraController:
         rim_elevation = math.radians(random.uniform(45, 80))
         rim_azimuth = math.radians(random.uniform(180, 360))
         
-        distance = random.uniform(3.0, 5.0)
+        distance = random.uniform(4.0, 7.0)  # Adjusted for larger cylinders
         x = distance * math.cos(rim_elevation) * math.cos(rim_azimuth)
         y = distance * math.cos(rim_elevation) * math.sin(rim_azimuth)
         z = distance * math.sin(rim_elevation)
@@ -409,8 +409,8 @@ class LightingCameraController:
         ambient_light.data.energy = 200  # Lower intensity for ambient fill
         ambient_light.data.size = 8.0    # Large size for even coverage
         
-        # Position above the scene for overall illumination
-        ambient_light.location = (0, 0, 8.0)
+        # Position above the scene for overall illumination of larger cylinders
+        ambient_light.location = (0, 0, 10.0)  # Increased height for larger cylinders
         ambient_light.rotation_euler = (0, 0, 0)  # Point downward
         
         # Set neutral color
