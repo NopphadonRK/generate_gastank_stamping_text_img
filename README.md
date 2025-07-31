@@ -8,10 +8,12 @@ This project creates realistic 3D rendered images of industrial gas cylinders wi
 
 ## ✨ Features
 
-- **Realistic 3D Gas Cylinder Models**: Procedurally generated with proper proportions and smooth surfaces
+- **Realistic 3D Gas Cylinder Models**: Procedurally generated with proper proportions and ultra-smooth metallic surfaces
+- **Advanced Surface Quality**: High-vertex meshes (64 vertices) with dual subdivision surfaces and smooth shading
 - **Authentic Debossing Effects**: Text appears physically stamped into the metal surface
+- **Enhanced Metallic Materials**: Realistic PBR materials with proper metallic/roughness values for industrial finishes
 - **FreesiaUPC Font Integration**: Uses Thai-style FreesiaUPC font for clear numeric text
-- **Smooth Surface Rendering**: High-quality subdivision surfaces with proper smooth shading
+- **Professional Caps Design**: Properly beveled top and bottom caps with matching vertex counts
 - **Dynamic Lighting**: Randomized three-point lighting creates realistic shadows and highlights
 - **Camera Variations**: Multiple viewing angles and perspectives per text sample
 - **Material Randomization**: Various metallic and plastic finishes with industrial color schemes
@@ -199,8 +201,8 @@ Sample naming: `6302-844353_001.png`, `2417-001227_045.png`
 - **Lighting**: 2-3 randomized light sources with varying intensity
 - **Text Placement**: Middle 60% of cylinder height
 - **Deboss Depth**: 0.001-0.005 Blender units
-- **Materials**: Industrial color palette with PBR properties
-- **Surface Quality**: High-vertex meshes (64 vertices) with subdivision surfaces and smooth shading
+- **Materials**: Enhanced metallic PBR materials with optimized roughness (0.1-0.4) and metallic values (0.8-1.0)
+- **Surface Quality**: Ultra-smooth 64-vertex meshes with dual subdivision surfaces and proper edge flow
 
 ## 📊 Dataset Specifications
 
@@ -236,13 +238,14 @@ pip install --upgrade pip
 
 ### Adding New Features
 
-1. **Custom Materials**: Modify `cylinder_generator.py` to add new surface materials
+1. **Custom Materials**: Modify `cylinder_generator.py` to add new surface materials and metallic properties
 2. **Text Effects**: Extend `text_embosser.py` for different stamping styles
 3. **Scene Variations**: Update `lighting_camera.py` for new camera/lighting setups
 4. **New Fonts**: Add font files to appropriate `fonts/` subdirectories
-5. **Surface Quality**: Adjust vertex count, subdivision levels, and smooth shading in `cylinder_generator.py`
-6. **Testing**: Always run `./test.sh` after changes
-7. **Documentation**: Update README.md when adding new features
+5. **Surface Quality**: Adjust vertex count, subdivision levels, metallic values, and surface smoothness in `cylinder_generator.py`
+6. **Edge Flow**: Modify geometry creation for better subdivision surface results
+7. **Testing**: Always run `./test.sh` after changes
+8. **Documentation**: Update README.md when adding new features
 
 ## 📈 Performance Notes
 

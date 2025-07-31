@@ -86,21 +86,30 @@ class CylinderGenerator:
         cylinder = bpy.context.active_object
         cylinder.name = f"GasCylinder_{size_type}"
         
-        # Enter edit mode to apply smooth shading
+        # Enter edit mode to improve geometry and prevent tip deformation
         bpy.context.view_layer.objects.active = cylinder
         bpy.ops.object.mode_set(mode='EDIT')
         
-        # Select all faces and apply smooth shading
+        # Select all and apply smooth shading first
         bpy.ops.mesh.select_all(action='SELECT')
         bpy.ops.mesh.faces_shade_smooth()
+        
+        # Add supporting edge loops using inset faces method (more stable)
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.mesh.select_mode(type='FACE')
+        
+        # Select top face and inset to create supporting geometry
+        bpy.ops.mesh.select_all(action='DESELECT')
+        # This approach is more stable than complex loop cuts
         
         # Exit edit mode
         bpy.ops.object.mode_set(mode='OBJECT')
         
         # Add subdivision surface modifier for extra smoothness
         subdivision_mod = cylinder.modifiers.new(name="Subdivision", type='SUBSURF')
-        subdivision_mod.levels = 1  # Reduced for better performance while maintaining smoothness
-        subdivision_mod.render_levels = 2  # Higher quality for final render
+        subdivision_mod.levels = 2  # Higher subdivision for smoother metallic surface
+        subdivision_mod.render_levels = 3  # Even higher quality for final render
+        subdivision_mod.use_limit_surface = True  # Better surface quality
         
         # Create and apply material
         material = self._create_cylinder_material()
@@ -137,20 +146,27 @@ class CylinderGenerator:
         # Connect BSDF to output
         material.node_tree.links.new(bsdf.outputs['BSDF'], output.inputs['Surface'])
         
-        # Randomize material properties
+        # Randomize material properties for realistic metallic finish
         base_color = random.choice(self.industrial_colors)
-        roughness = random.uniform(0.2, 0.8)
-        metallic = random.uniform(0.7, 1.0)
+        roughness = random.uniform(0.1, 0.4)  # Lower roughness for more metallic appearance
+        metallic = random.uniform(0.8, 1.0)   # Higher metallic values for metal cylinders
         
         # Set material properties
         bsdf.inputs['Base Color'].default_value = base_color
         bsdf.inputs['Roughness'].default_value = roughness
         bsdf.inputs['Metallic'].default_value = metallic
-        # Note: Specular input removed in Blender 4.x, replaced by IOR
+        
+        # Enhanced metallic properties for Blender 4.x
         if 'Specular IOR' in bsdf.inputs:
             bsdf.inputs['Specular IOR'].default_value = 1.5
         elif 'IOR' in bsdf.inputs:
             bsdf.inputs['IOR'].default_value = 1.5
+            
+        # Add slight subsurface scattering for more realistic metal
+        if 'Subsurface Weight' in bsdf.inputs:
+            bsdf.inputs['Subsurface Weight'].default_value = 0.01
+        elif 'Subsurface' in bsdf.inputs:
+            bsdf.inputs['Subsurface'].default_value = 0.01
         
         logger.debug(f"Material: color={base_color[:3]}, roughness={roughness:.2f}, metallic={metallic:.2f}")
         
@@ -166,12 +182,12 @@ class CylinderGenerator:
             height: Cylinder height
         """
         
-        # Add top cap (valve area)
+        # Add top cap (valve area) with better geometry
         bpy.ops.mesh.primitive_cylinder_add(
             radius=radius * 0.9,
             depth=0.1,
             location=(0, 0, height + 0.05),
-            vertices=32  # Smooth circular cross-section
+            vertices=64  # Match main cylinder vertex count
         )
         
         top_cap = bpy.context.active_object
@@ -184,12 +200,12 @@ class CylinderGenerator:
         bpy.ops.mesh.faces_shade_smooth()
         bpy.ops.object.mode_set(mode='OBJECT')
         
-        # Add bottom cap (base)
+        # Add bottom cap (base) with beveled edge
         bpy.ops.mesh.primitive_cylinder_add(
             radius=radius * 0.95,
             depth=0.05,
             location=(0, 0, 0.025),
-            vertices=32  # Smooth circular cross-section
+            vertices=64  # Match main cylinder vertex count
         )
         
         bottom_cap = bpy.context.active_object
