@@ -8,9 +8,10 @@ This project creates realistic 3D rendered images of industrial gas cylinders wi
 
 ## ✨ Features
 
-- **Realistic 3D Gas Cylinder Models**: Procedurally generated with proper proportions
+- **Realistic 3D Gas Cylinder Models**: Procedurally generated with proper proportions and smooth surfaces
 - **Authentic Debossing Effects**: Text appears physically stamped into the metal surface
 - **FreesiaUPC Font Integration**: Uses Thai-style FreesiaUPC font for clear numeric text
+- **Smooth Surface Rendering**: High-quality subdivision surfaces with proper smooth shading
 - **Dynamic Lighting**: Randomized three-point lighting creates realistic shadows and highlights
 - **Camera Variations**: Multiple viewing angles and perspectives per text sample
 - **Material Randomization**: Various metallic and plastic finishes with industrial color schemes
@@ -199,6 +200,7 @@ Sample naming: `6302-844353_001.png`, `2417-001227_045.png`
 - **Text Placement**: Middle 60% of cylinder height
 - **Deboss Depth**: 0.001-0.005 Blender units
 - **Materials**: Industrial color palette with PBR properties
+- **Surface Quality**: High-vertex meshes (64 vertices) with subdivision surfaces and smooth shading
 
 ## 📊 Dataset Specifications
 
@@ -238,8 +240,9 @@ pip install --upgrade pip
 2. **Text Effects**: Extend `text_embosser.py` for different stamping styles
 3. **Scene Variations**: Update `lighting_camera.py` for new camera/lighting setups
 4. **New Fonts**: Add font files to appropriate `fonts/` subdirectories
-5. **Testing**: Always run `./test.sh` after changes
-6. **Documentation**: Update README.md when adding new features
+5. **Surface Quality**: Adjust vertex count, subdivision levels, and smooth shading in `cylinder_generator.py`
+6. **Testing**: Always run `./test.sh` after changes
+7. **Documentation**: Update README.md when adding new features
 
 ## 📈 Performance Notes
 
