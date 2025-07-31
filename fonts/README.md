@@ -21,9 +21,19 @@ Monospaced fonts for uniform character spacing:
 
 ### `default/`
 Backup fonts and system defaults:
+- **FreesiaUPC.ttf**: Thai-style font (included)
+- **FreesiabUPC.ttf**: FreesiaUPC Bold version (included)
 - Fallback fonts when custom fonts are unavailable
 - System-installed fonts
 - Blender's default "Bfont"
+
+## Included Fonts
+
+### FreesiaUPC Font Family
+The project includes FreesiaUPC fonts which are excellent for industrial stamping:
+- **FreesiaUPC Regular**: Clear, readable characters suitable for gas tank markings
+- **FreesiaUPC Bold**: Heavier weight for more pronounced stamping effects
+- **Character Support**: Numbers (0-9) and hyphens (-) perfect for pattern xxxx-xxxxxx
 
 ## Font Installation
 

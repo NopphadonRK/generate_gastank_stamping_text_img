@@ -141,21 +141,27 @@ class TextEmbosser:
         # Set text content
         text_obj.data.body = text_content
         
-        # Load and apply font
-        font_path = self._select_random_font()
-        if font_path and os.path.exists(font_path):
-            try:
-                font = bpy.data.fonts.load(font_path)
-                text_obj.data.font = font
-                logger.debug(f"Applied font: {os.path.basename(font_path)}")
-            except Exception as e:
-                logger.warning(f"Failed to load font {font_path}: {e}")
+        # Try to load FreesiaUPC font first
+        fresia_font = self._load_fresia_font()
+        if fresia_font:
+            text_obj.data.font = fresia_font
+            logger.debug("Applied FreesiaUPC font")
+        else:
+            # Load and apply custom font
+            font_path = self._select_random_font()
+            if font_path and os.path.exists(font_path):
+                try:
+                    font = bpy.data.fonts.load(font_path)
+                    text_obj.data.font = font
+                    logger.debug(f"Applied font: {os.path.basename(font_path)}")
+                except Exception as e:
+                    logger.warning(f"Failed to load font {font_path}: {e}")
+                    # Use default Blender font
+                    text_obj.data.font = bpy.data.fonts.get('Bfont')
+            else:
                 # Use default Blender font
                 text_obj.data.font = bpy.data.fonts.get('Bfont')
-        else:
-            # Use default Blender font
-            text_obj.data.font = bpy.data.fonts.get('Bfont')
-            logger.debug("Using default Blender font")
+                logger.debug("Using default Blender font")
         
         # Set text properties
         text_obj.data.size = random.uniform(*self.text_size_range)
@@ -280,3 +286,40 @@ class TextEmbosser:
         text_mesh.hide_viewport = True
         
         logger.debug("Boolean deboss effect applied to cylinder")
+    
+    def _load_fresia_font(self) -> Optional[bpy.types.VectorFont]:
+        """
+        Try to load FreesiaUPC font from macOS system locations.
+        
+        Returns:
+            FreesiaUPC font object, or None if not found
+        """
+        
+        # Possible locations for FreesiaUPC font on macOS
+        font_paths = [
+            # Project fonts directory first
+            os.path.join(self.font_dir, "default", "FreesiaUPC.ttf"),
+            os.path.join(self.font_dir, "default", "FreesiabUPC.ttf"),  # Bold version
+            os.path.join(self.font_dir, "FreesiaUPC.ttf"),
+            os.path.join(self.font_dir, "industrial", "FreesiaUPC.ttf"),
+            # System locations
+            "/Users/admin/Library/Fonts/FreesiaUPC.ttf",
+            "/Users/admin/Library/Fonts/FreesiabUPC.ttf",
+            "/System/Library/Fonts/Supplemental/FreesiaUPC.ttf",
+            "/Library/Fonts/FreesiaUPC.ttf",
+            "/System/Library/Fonts/FreesiaUPC.ttf",
+            os.path.expanduser("~/Library/Fonts/FreesiaUPC.ttf"),
+        ]
+        
+        for font_path in font_paths:
+            if os.path.exists(font_path):
+                try:
+                    font = bpy.data.fonts.load(font_path)
+                    logger.info(f"FreesiaUPC font loaded from: {font_path}")
+                    return font
+                except Exception as e:
+                    logger.debug(f"Failed to load FreesiaUPC from {font_path}: {e}")
+                    continue
+        
+        logger.debug("FreesiaUPC font not found in system locations")
+        return None
