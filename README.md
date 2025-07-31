@@ -29,6 +29,10 @@ This project creates realistic 3D rendered images of industrial gas cylinders wi
 generate_gastank_stamping_text_img/
 ├── data/
 │   └── dict.txt                 # Text strings for stamping
+├── fonts/
+│   ├── industrial/              # Industrial-style fonts
+│   ├── monospace/               # Monospaced fonts for stamps
+│   └── default/                 # Default system fonts backup
 ├── output/
 │   ├── images/                  # Generated PNG images
 │   └── labels/                  # Ground truth text files
@@ -75,7 +79,14 @@ generate_gastank_stamping_text_img/
    echo "GASCO-X7Y" >> data/dict.txt
    ```
 
-2. **Generate Dataset**
+2. **Setup Fonts (Optional)**
+   ```bash
+   # Add industrial fonts to fonts/ directory for realistic stamping
+   # Recommended: Arial, Helvetica, Courier New, or similar monospace fonts
+   # The system will use default fonts if custom fonts are not provided
+   ```
+
+3. **Generate Dataset**
    ```bash
    # Generate 100 images with default settings
    blender --background --python scripts/main.py -- --count 100 --dict data/dict.txt
@@ -85,10 +96,11 @@ generate_gastank_stamping_text_img/
      --count 1000 \
      --dict data/dict.txt \
      --output output/ \
-     --resolution 1024 512
+     --resolution 1024 512 \
+     --font-dir fonts/industrial/
    ```
 
-3. **Check Results**
+4. **Check Results**
    ```bash
    ls output/images/    # Generated PNG images
    ls output/labels/    # Corresponding text files
@@ -117,6 +129,8 @@ Sample naming: `ACMEGAS123_001.png`, `FIREEXT1A_045.png`
 --resolution W H     # Image dimensions (default: 512 256)
 --samples INT        # Render quality samples (default: 64)
 --seed INT           # Random seed for reproducibility
+--font-dir PATH      # Directory containing custom fonts (default: fonts/)
+--font-style STR     # Font style preference: industrial, monospace, default
 ```
 
 ### Randomization Parameters

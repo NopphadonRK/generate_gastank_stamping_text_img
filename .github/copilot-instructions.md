@@ -53,6 +53,18 @@ scripts/
 ├── text_embosser.py     # Text debossing effects  
 ├── lighting_camera.py   # Scene setup and randomization
 └── utils.py            # Helper functions
+
+fonts/
+├── industrial/          # Industrial-style fonts (.ttf, .otf)
+├── monospace/           # Monospaced fonts for stamps
+└── default/             # Default system fonts backup
+
+data/
+└── dict.txt            # Text strings for stamping
+
+output/
+├── images/             # Generated PNG images
+└── labels/             # Ground truth text files
 ```
 
 #### Blender API Best Practices
@@ -111,7 +123,29 @@ cylinder = bpy.context.active_object
 bpy.ops.object.text_add()
 text_obj = bpy.context.active_object
 text_obj.data.body = "SAMPLE_TEXT"
-text_obj.data.font = bpy.data.fonts.load("path/to/font.ttf")
+
+# Load custom font from fonts directory
+font_path = "fonts/industrial/arial_bold.ttf"
+if os.path.exists(font_path):
+    text_obj.data.font = bpy.data.fonts.load(font_path)
+else:
+    # Use default Blender font
+    text_obj.data.font = bpy.data.fonts['Bfont']
+```
+
+#### 4. Font Management
+```python
+def load_fonts_from_directory(font_dir):
+    """Load available fonts from specified directory"""
+    font_extensions = ['.ttf', '.otf', '.woff']
+    fonts = []
+    for ext in font_extensions:
+        fonts.extend(glob.glob(os.path.join(font_dir, f"**/*{ext}"), recursive=True))
+    return fonts
+
+def get_random_font(font_list):
+    """Select random font for text variation"""
+    return random.choice(font_list) if font_list else None
 ```
 
 ### Output Requirements
